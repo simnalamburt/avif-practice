@@ -79,7 +79,7 @@ unsafe fn unsafe_main() {
     //
     // Windowing
     //
-    let mut window = Window::new("debug-avif", width, height, WindowOptions::default()).unwrap();
+    let mut window = Window::new("avif-practice", width, height, WindowOptions::default()).unwrap();
     let now = Instant::now();
     while window.is_open() {
         let elapsed = now.elapsed().as_secs_f64();
