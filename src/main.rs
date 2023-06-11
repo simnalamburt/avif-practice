@@ -60,9 +60,15 @@ unsafe fn unsafe_main() {
         let frame: Vec<_> = buffer
             .chunks(4)
             .map(|rgba| {
-                let [r, g, b, _] = *rgba else { unreachable!() };
-                // TODO: Treat alpha properly
-                (r as u32) << 16 | (g as u32) << 8 | (b as u32)
+                let [r, g, b, a] = *rgba else { unreachable!() };
+                let a = a as u32;
+                let r = r as u32 * a / 0xFF;
+                let g = g as u32 * a / 0xFF;
+                let b = b as u32 * a / 0xFF;
+                debug_assert!(r <= 0xFF);
+                debug_assert!(g <= 0xFF);
+                debug_assert!(b <= 0xFF);
+                r << 16 | g << 8 | b
             })
             .collect();
         ptr_and_frames.push(((*decoder).imageTiming.pts, frame));
