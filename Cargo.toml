@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 libavif-sys = { version = "0.14.3", git = "https://github.com/yekeskin/libavif-rs.git", default-features = false, features = ["codec-dav1d", "codec-rav1e"] }
+minifb = "0.24"
