@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use libavif_sys as c;
 use minifb::{Window, WindowOptions};
 
@@ -24,7 +26,10 @@ unsafe fn unsafe_main() {
 
     let width = (*(*decoder).image).width as usize;
     let height = (*(*decoder).image).height as usize;
-    let mut frames = Vec::with_capacity((*decoder).imageCount as usize);
+    let duration = (*decoder).duration;
+
+    let count = (*decoder).imageCount as usize;
+    let mut ptr_and_frames = Vec::with_capacity(count);
 
     // Parse frames loop
     loop {
@@ -49,17 +54,8 @@ unsafe fn unsafe_main() {
             err => panic!("avifImageYUVToRGB() failed: {err}"),
         }
 
-        frames.push(buffer);
-    }
-    assert_eq!(frames.len(), (*decoder).imageCount as usize);
-    c::avifDecoderDestroy(decoder);
-
-    //
-    // Windowing
-    //
-    let mut window = Window::new("debug-avif", width, height, WindowOptions::default()).unwrap();
-    while window.is_open() {
-        let buf: Vec<_> = frames[0]
+        // Convert RGBA into 0RGB format
+        let frame: Vec<_> = buffer
             .chunks(4)
             .map(|rgba| {
                 let [r, g, b, _] = *rgba else { unreachable!() };
@@ -67,7 +63,23 @@ unsafe fn unsafe_main() {
                 (r as u32) << 16 | (g as u32) << 8 | (b as u32)
             })
             .collect();
+        ptr_and_frames.push(((*decoder).imageTiming.pts, frame));
+    }
+    debug_assert_eq!(ptr_and_frames.len(), count);
+    c::avifDecoderDestroy(decoder);
 
-        window.update_with_buffer(&buf, width, height).unwrap();
+    //
+    // Windowing
+    //
+    let mut window = Window::new("debug-avif", width, height, WindowOptions::default()).unwrap();
+    let now = Instant::now();
+    while window.is_open() {
+        let elapsed = now.elapsed().as_secs_f64();
+        let idx = ptr_and_frames.partition_point(|(pts, _)| *pts <= elapsed % duration) - 1;
+        debug_assert!(idx < ptr_and_frames.len());
+
+        window
+            .update_with_buffer(&ptr_and_frames[idx].1, width, height)
+            .unwrap();
     }
 }
