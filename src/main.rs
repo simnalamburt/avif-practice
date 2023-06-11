@@ -11,7 +11,7 @@ unsafe fn unsafe_main() {
     //
     // Decode AVIF
     //
-    let avif_bytes = include_bytes!("../assets/frog.avif");
+    let avif_bytes = include_bytes!("../assets/alpha.avif");
 
     let decoder = c::avifDecoderCreate();
     match c::avifDecoderSetIOMemory(decoder, avif_bytes.as_ptr(), avif_bytes.len()) {
@@ -30,6 +30,8 @@ unsafe fn unsafe_main() {
 
     let count = (*decoder).imageCount as usize;
     let mut ptr_and_frames = Vec::with_capacity(count);
+
+    dbg!(width, height, duration, count);
 
     // Parse frames loop
     loop {
