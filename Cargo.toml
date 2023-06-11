@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libavif-sys = { version = "0.14.3", git = "https://github.com/yekeskin/libavif-rs.git", default-features = false, features = ["codec-dav1d", "codec-rav1e"] }
+libavif-sys = { version = "0.14.3", git = "https://github.com/yekeskin/libavif-rs.git", default-features = false, features = ["codec-dav1d"] }
 minifb = "0.24"
